@@ -17,6 +17,7 @@
  * [Node.js]
  *
  */
+
 var {
 	createCanvas,
 	loadImage,
@@ -100,7 +101,7 @@ QRCodeModel.prototype = {
 			throw new Error(row + "," + col);
 		}
 
-		var block = this.modules[row][col]; // [isDark(ture/false), EyeOuterOrInner(O/I), Position(TL/TR/BL/A) ]
+		var block = this.modules[row][col]; // [isDark(true/false), EyeOuterOrInner(O/I), Position(TL/TR/BL/A) ]
 
 		if (block[1]) {
 			var type = 'P' + block[1] + '_' + block[2]; //PO_TL, PI_TL, PO_TR, PI_TR, PO_BL, PI_BL
@@ -128,11 +129,11 @@ QRCodeModel.prototype = {
 		for (var row = 0; row < this.moduleCount; row++) {
 			this.modules[row] = new Array(this.moduleCount);
 			for (var col = 0; col < this.moduleCount; col++) {
-				this.modules[row][col] = []; // [isDark(ture/false), EyeOuterOrInner(O/I), Position(TL/TR/BL) ]
+				this.modules[row][col] = []; // [isDark(true/false), EyeOuterOrInner(O/I), Position(TL/TR/BL) ]
 			}
 		}
 		this.setupPositionProbePattern(0, 0, 'TL'); // TopLeft, TL
-		this.setupPositionProbePattern(this.moduleCount - 7, 0, 'BL'); // BotoomLeft, BL
+		this.setupPositionProbePattern(this.moduleCount - 7, 0, 'BL'); // BottomLeft, BL
 		this.setupPositionProbePattern(0, this.moduleCount - 7, 'TR'); // TopRight, TR
 		this.setupPositionAdjustPattern('A'); // Alignment, A
 		this.setupTimingPattern();
@@ -1062,7 +1063,7 @@ var Drawing = function(htOption) {
 
 	this._oContext = this._canvas.getContext("2d");
 	this._oContext.patternQuality = 'best'; //'fast'|'good'|'best'|'nearest'|'bilinear'
-	this._oContext.quality = 'best'; //'fast'|'good'|'best'|'nearest'|'bilinear'
+	this._oContext.quality = 'nearest'; //'fast'|'good'|'best'|'nearest'|'bilinear'
 	this._oContext.textDrawingMode = 'path'; // 'path'|'glyph'
 	this._oContext.antialias = 'gray'; // 'default'|'none'|'gray'|'subpixel'
 
@@ -1076,12 +1077,11 @@ var Drawing = function(htOption) {
  */
 Drawing.prototype.draw = function(oQRCode) {
 
-
 	var _oContext = this._oContext;
 	var _htOption = this._htOption;
 
 
-	if (!_htOption.title && !_htOption.subTitle) {
+	if (!_htOption.title) {
 		_htOption.height -= _htOption.titleHeight;
 		_htOption.titleHeight = 0;
 	}
@@ -1099,53 +1099,65 @@ Drawing.prototype.draw = function(oQRCode) {
 	this._canvas.width = this._htOption.width + this._htOption.quietZone * 2;
 	this._canvas.height = this._htOption.height + this._htOption.quietZone * 2;
 
-    var autoColorDark="rgba(0, 0, 0, .6)";
-    var autoColorLight="rgba(255, 255, 255, .7)";
-    var notAutoColorLight="rgba(0,0,0,0)";
-  
-    // JPG
-    if(_htOption.format=='JPG' ){
+	var autoColorDark = "rgba(0, 0, 0, .6)";
+	var autoColorLight = "rgba(255, 255, 255, .7)";
+	var notAutoColorLight = "rgba(0,0,0,0)";
 
-        if( _htOption.quietZoneColor=='transparent'){
-            _htOption.quietZoneColor='#ffffff';
-        }
+	// JPG
+	if (_htOption.format == 'JPG') {
 
-        _htOption.logoBackgroundTransparent=false;
+		if (_htOption.quietZoneColor == 'transparent') {
+			_htOption.quietZoneColor = '#ffffff';
+		}
 
-        autoColorDark= _htOption.colorDark;
-        autoColorLight= _htOption.colorLight;
-        notAutoColorLight=_htOption.colorLight;
+		//_htOption.logoBackgroundTransparent = false;
 
-        _oContext.fillStyle = "#ffffff";
-        _oContext.fillRect(0, 0, this._canvas.width, this._canvas.height);
-    }else{
+		autoColorDark = _htOption.colorDark;
+		autoColorLight = _htOption.colorLight;
+		notAutoColorLight = _htOption.colorLight;
+
+		_oContext.fillStyle = "#ffffff";
+		_oContext.fillRect(0, 0, this._canvas.width, this._canvas.height);
+	} else {
 		_oContext.lineWidth = 0;
-		_oContext.fillStyle =  this._htOption.colorLight;
+		_oContext.fillStyle = this._htOption.colorLight;
 		_oContext.fillRect(0, 0, this._canvas.width, this._canvas.height);
 	}
 
 
 	var t = this;
 
-    function drawQuietZoneColor(){
-        // top
-        _oContext.lineWidth = 0;
-        _oContext.fillStyle =  _htOption.quietZoneColor;
+	function drawQuietZoneColor() {
+		// top
+		_oContext.lineWidth = 0;
+		_oContext.fillStyle = _htOption.quietZoneColor;
 
-        _oContext.fillRect(0, 0, t._canvas.width, _htOption.quietZone);
-        // left
-         _oContext.fillRect(0, _htOption.quietZone, _htOption.quietZone, t._canvas.height-_htOption.quietZone*2);
-        // right
-         _oContext.fillRect(t._canvas.width-_htOption.quietZone,  _htOption.quietZone, _htOption.quietZone, t._canvas.height-_htOption.quietZone*2);
-        // bottom
-         _oContext.fillRect(0, t._canvas.height-_htOption.quietZone, t._canvas.width, _htOption.quietZone);
-    }
+		_oContext.fillRect(0, 0, t._canvas.width, _htOption.quietZone);
+		// left
+		_oContext.fillRect(0, _htOption.quietZone, _htOption.quietZone, t._canvas.height - _htOption.quietZone * 2);
+		// right
+		_oContext.fillRect(t._canvas.width - _htOption.quietZone, _htOption.quietZone, _htOption.quietZone, t._canvas.height - _htOption.quietZone * 2);
+		// bottom
+		_oContext.fillRect(0, t._canvas.height - _htOption.quietZone, t._canvas.width, _htOption.quietZone);
+	}
+
+	var _qrColor;
+
+	if (_htOption.colorGradient) {
+		var gradient = _oContext.createLinearGradient(0, _htOption.height / 6, 0, (_htOption.height * 5)/6);
+
+		gradient.addColorStop(0, _htOption.colorDark1);
+		gradient.addColorStop(1, _htOption.colorDark2);
+		_qrColor = gradient;
+	} else {
+		_qrColor = _htOption.colorDark;
+	}
 
 	if (_htOption.backgroundImage) {
 
 		// backgroundImage
 		var bgImg = new Image();
-		bgImg.onload = function() {
+		bgImg.onload = function () {
 			_oContext.globalAlpha = 1;
 			_oContext.globalAlpha = _htOption.backgroundImageAlpha;
 			_oContext.drawImage(bgImg, 0, _htOption.titleHeight, _htOption.width + _htOption.quietZone * 2, _htOption.height +
@@ -1171,65 +1183,122 @@ Drawing.prototype.draw = function(oQRCode) {
 
 				var eye = oQRCode.getEye(row, col); // { isDark: true/false, type: PO_TL, PI_TL, PO_TR, PI_TR, PO_BL, PI_BL };
 
+				//devo capire la dimensione dell'occhio e disegnare il cerchio di conseguenza con _oContext.arc(.....), fill
+
 				if (eye) {
 					// Is eye
 					bIsDark = eye.isDarkBlock;
-					var type = eye.type;
+					var eyeColorDark = _htOption[eye.type]  || _qrColor;
 
-					// PX_XX, PX, colorDark, colorLight
-					var eyeColorDark = _htOption[type] || _htOption[type.substring(0, 2)] || _htOption.colorDark;
+					if (_htOption.eyeShape == 'circle'){
+						if ((row == 3 && col == 3) || (row == 3 && col == nCount - 4) || (row == nCount - 4 && col == 3)) {
+							//Position Top Left - Top Right - bottom Left
+							_oContext.beginPath();
+							_oContext.arc((row+0.5) * nWidth + _htOption.quietZone, (col+0.5) * nHeight + _htOption.quietZone, 2.5 * nWidth, 0, Math.PI * 2);
+							_oContext.fillStyle = _htOption.colorLight;
+							_oContext.lineWidth = 2 * nWidth;
+							_oContext.strokeStyle = eyeColorDark;
+							_oContext.stroke();
+							_oContext.fill();
+							_oContext.closePath();
 
-					_oContext.lineWidth = 0;
-					_oContext.strokeStyle = bIsDark ? eyeColorDark : _htOption.colorLight;
-					_oContext.fillStyle = bIsDark ? eyeColorDark : _htOption.colorLight;
+							//position Top Left - Top Right - Bottom Left INNER
 
-					_oContext.fillRect(nLeft, _htOption.titleHeight + nTop, nWidth, nHeight);
-
-				} else {
-					_oContext.lineWidth = 0;
-					_oContext.strokeStyle = bIsDark ? _htOption.colorDark : _htOption.colorLight;
-					_oContext.fillStyle = bIsDark ? _htOption.colorDark : _htOption.colorLight;
-
-					var nowDotScale = _htOption.dotScale;
-					if (row == 6) {
-						// Timing Pattern
-						nowDotScale = 1;
-						var timingHColorDark = _htOption.timing_H || _htOption.timing || _htOption.colorDark;
-						_oContext.fillStyle = bIsDark ? timingHColorDark : _htOption.colorLight;
-						_oContext.strokeStyle = _oContext.fillStyle;
-						_oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight + nTop + nHeight * (1 -
-							nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
-					} else if (col == 6) {
-						// Timing Pattern
-						nowDotScale = 1;
-						var timingVColorDark = _htOption.timing_V || _htOption.timing || _htOption.colorDark;
-						_oContext.fillStyle = bIsDark ? timingVColorDark : _htOption.colorLight;
-						_oContext.strokeStyle = _oContext.fillStyle;
-						_oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight + nTop + nHeight * (1 -
-							nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
-					} else {
-
-						if (_htOption.backgroundImage) {
-
-							if (_htOption.autoColor) {
-								_oContext.strokeStyle = bIsDark ? autoColorDark : autoColorLight;
-								_oContext.fillStyle = bIsDark ? autoColorDark : autoColorLight;
-							} else {
-								_oContext.fillStyle = bIsDark ? _htOption.colorDark : _htOption.colorLight;
-								_oContext.strokeStyle = _oContext.fillStyle;
-							}
-                                _oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight + nTop + nHeight * (1 -
-                                	nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
-
-						} else {
-							_oContext.strokeStyle = _oContext.fillStyle;
-
-							_oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight + nTop + nHeight * (1 -
-								nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
+							_oContext.beginPath();
+							_oContext.fillStyle = eyeColorDark;
+							_oContext.arc((row+0.5) * nWidth + _htOption.quietZone, (col+0.5) * nHeight + _htOption.quietZone, 1.5 * nWidth, 0, Math.PI * 2);
+							_oContext.fill();
+							_oContext.closePath();
 
 						}
+
+						if (row == nCount - 7 && col == nCount - 7){		//alignment pattern: smaller
+							_oContext.beginPath();
+							_oContext.arc((row+0.5) * nWidth + _htOption.quietZone, (col+0.5) * nHeight + _htOption.quietZone, 1.75 * nWidth, 0, Math.PI * 2);
+							_oContext.fillStyle = _htOption.colorLight;
+							_oContext.lineWidth = 1.5 * nWidth;
+							_oContext.strokeStyle = eyeColorDark;
+							_oContext.stroke();
+							_oContext.fill();
+							_oContext.closePath();
+
+							_oContext.beginPath();
+							_oContext.fillStyle = eyeColorDark;
+						  _oContext.arc((row+0.5) *nWidth + _htOption.quietZone, (col+0.5) *nHeight + _htOption.quietZone, 0.75 * nWidth, 0, Math.PI *2);
+							_oContext.fill();
+							_oContext.closePath();
+						}
+					}
+					else {
+						_oContext.strokeStyle = bIsDark ? eyeColorDark : _htOption.colorLight;
+						_oContext.fillStyle = bIsDark ? eyeColorDark : _htOption.colorLight;
+						_oContext.lineWidth = 0;
+						_oContext.fillRect(nLeft, _htOption.titleHeight + nTop, nWidth, nHeight);
+					}
+
+				} else if (!eye) {
+					//if not eye
+
+					const minSize = Math.min(_htOption.width, _htOption.height);
+					let dotSize = Math.floor(minSize / nCount) - _htOption.dotScale;
+					let bIsDark = oQRCode.isDark(row, col);
+					const dotStyle = _htOption.dotShape;
+					let x = nLeft + nWidth * (1 - _htOption.dotScale) / 2;
+					let y = _htOption.titleHeight + nTop + nHeight * (1 - _htOption.dotScale) / 2;
+
+					if (_htOption.backgroundImage) {
+
+						if (_htOption.autoColor) {
+							_oContext.strokeStyle = bIsDark ? autoColorDark : autoColorLight;
+							_oContext.fillStyle = bIsDark ? autoColorDark : autoColorLight;
+						} else {
+							_oContext.fillStyle = bIsDark ? _qrColor : _htOption.colorLight;
+							_oContext.strokeStyle = _oContext.fillStyle;
+							_oContext.fillRect(x / 2, y / 2, nWidth * dotSize, nHeight * dotSize);
+						}
+					}
+					if (bIsDark) {
+						_oContext.lineWidth = 0;
+						//_oContext.fillStyle = bIsDark ? _qrColor : _htOption.colorLight;
+						_oContext.fillStyle = _qrColor;
+						_oContext.strokeStyle = _oContext.fillStyle;
+						switch (dotStyle) {
+
+							case 'dots':
+								_oContext.beginPath();
+								_oContext.arc(x + dotSize / 2, y + dotSize / 2, dotSize / 2, 1 / 2, Math.PI * 2);
+								_oContext.fill();
+								break;
+
+							case 'rounded' :
+								_oContext.beginPath();
+								_oContext.moveTo(x, y + dotSize / 2);
+								_oContext.quadraticCurveTo(x, y, x + dotSize / 2, y);
+								_oContext.quadraticCurveTo(x + dotSize, y, x + dotSize, y + dotSize / 2);
+								_oContext.quadraticCurveTo(x + dotSize, y + dotSize, x + dotSize / 2, y + dotSize);
+								_oContext.quadraticCurveTo(x, y + dotSize, x, y + dotSize / 2);
+								_oContext.closePath();
+								_oContext.fill();
+								break;
+							case 'rhombus' :
+								_oContext.beginPath();
+								_oContext.moveTo(x, y + dotSize / 2);
+								_oContext.lineTo(x + dotSize / 2, y + dotSize);
+								_oContext.lineTo(x + dotSize, y + dotSize / 2);
+								_oContext.lineTo(x + dotSize / 2, y);
+								_oContext.closePath();
+								_oContext.fill();
+								break;
+
+							case 'square' :
+							default:
+								_oContext.fillRect(x, y, nWidth * _htOption.dotScale, nHeight * _htOption.dotScale);
+								break;
+						}
+						_oContext.fill();
 					}
 				}
+
 
 				if (_htOption.dotScale != 1 && !eye) {
 					_oContext.strokeStyle = _htOption.colorLight;
@@ -1240,18 +1309,12 @@ Drawing.prototype.draw = function(oQRCode) {
 
 		if (_htOption.title) {
 			_oContext.fillStyle = _htOption.titleBackgroundColor;
-			_oContext.fillRect(0, 0, t._canvas.width, _htOption.titleHeight+this._htOption.quietZone);
+			_oContext.fillRect(0, 0, t._canvas.width, _htOption.titleHeight + this._htOption.quietZone);
 
 			_oContext.font = _htOption.titleFont;
 			_oContext.fillStyle = _htOption.titleColor;
 			_oContext.textAlign = 'center';
-			_oContext.fillText(_htOption.title, t._canvas.width / 2, this._htOption.quietZone+this._htOption.titleTop);
-		}
-
-		if (_htOption.subTitle) {
-			_oContext.font = _htOption.subTitleFont;
-			_oContext.fillStyle = _htOption.subTitleColor;
-			_oContext.fillText(_htOption.subTitle, t._canvas.width / 2, this._htOption.quietZone+this._htOption.subTitleTop);
+			_oContext.fillText(_htOption.title, t._canvas.width / 2, this._htOption.quietZone + this._htOption.titleTop);
 		}
 
 		if (_htOption.logo) {
@@ -1276,13 +1339,18 @@ Drawing.prototype.draw = function(oQRCode) {
 
 				// Did Not Use Transparent Logo Image
 				if (!_htOption.logoBackgroundTransparent) {
-					//if (!_htOption.logoBackgroundColor) {
-					//_htOption.logoBackgroundColor = '#ffffff';
-					//}
 					_oContext.fillStyle = _htOption.logoBackgroundColor;
+					if (_htOption.logoBackgroundShape == 'square'){
+						_oContext.fillRect((_htOption.width + _htOption.quietZone * 2 - imgW) / 2, (_htOption.height + _htOption.titleHeight +
+							_htOption.quietZone * 2 - imgH) / 2, imgW, imgH);
 
-					_oContext.fillRect((_htOption.width + _htOption.quietZone * 2 - imgW) / 2, (_htOption.height + _htOption.titleHeight +
-						_htOption.quietZone * 2 - imgH) / 2, imgW, imgW);
+						_oContext.fill();
+					} else {
+						_oContext.beginPath();
+						_oContext.arc((_htOption.width + _htOption.quietZone * 2) / 2, (_htOption.height + _htOption.titleHeight +
+							_htOption.quietZone * 2) / 2, Math.max(imgH, imgW) / 1.8, 0, Math.PI * 2);
+						_oContext.fill();
+					}
 				}
 
 				_oContext.drawImage(img, (_htOption.width + _htOption.quietZone * 2 - imgW) / 2, (_htOption.height +
@@ -1290,19 +1358,19 @@ Drawing.prototype.draw = function(oQRCode) {
 
 				_this._bIsPainted = true;
 
-                if(_htOption.quietZone>0 && _htOption.quietZoneColor){
-                    drawQuietZoneColor();
-                }
+				if (_htOption.quietZone > 0 && _htOption.quietZoneColor) {
+					drawQuietZoneColor();
+				}
 
 				_this.makeImage();
 			}
 
 
-			img.onload = function() {
+			img.onload = function () {
 				genratorImg();
 			}
 
-			img.onerror = function(e) {
+			img.onerror = function (e) {
 				console.error(e)
 			}
 
@@ -1314,13 +1382,11 @@ Drawing.prototype.draw = function(oQRCode) {
 
 		} else {
 			this._bIsPainted = true;
-            if(_htOption.quietZone>0 && _htOption.quietZoneColor){
-                drawQuietZoneColor();
-            }
+			if (_htOption.quietZone > 0 && _htOption.quietZoneColor) {
+				drawQuietZoneColor();
+			}
 			this.makeImage();
 		}
-
-
 
 	}
 
@@ -1367,8 +1433,6 @@ Drawing.prototype.makeImage = function() {
 		if (this._htOption.onRenderingStart) {
 			this._htOption.onRenderingStart(this._htOption);
 		}
-
-
         if(this._htOption.format== 'PNG'){
             // dataUrl = this._canvas.toDataURL()
             this._canvas.toDataURL((err, data) => {
@@ -1379,11 +1443,7 @@ Drawing.prototype.makeImage = function() {
             	t.resolve(data);
             })
         }
-
-
 	}
-
-
 };
 
 /**
@@ -1392,6 +1452,7 @@ Drawing.prototype.makeImage = function() {
  * @return {Boolean}
  */
 Drawing.prototype.isPainted = function() {
+	console.log(this._bIsPainted);
 	return this._bIsPainted;
 };
 
@@ -1416,7 +1477,13 @@ function QRCode(vOption) {
 		colorLight: "#ffffff",
 		correctLevel: QRErrorCorrectLevel.H,
 
+		//ADD GRADIENT COLOR
+		colorGradient: false, 		//default is false: if true ColorDark1, colorDark2
+		colorDark1: "#000000",
+		colorDark2: "#000000",
+
 		dotScale: 1, // Must be greater than 0, less than or equal to 1. default is 1
+		dotShape: 'square',		//Can be square, rounded, rhombus or Dots
 
         quietZone: 0,
         quietZoneColor: 'transparent',
@@ -1425,19 +1492,15 @@ function QRCode(vOption) {
 		titleFont: "bold 16px Arial",
 		titleColor: "#000000",
 		titleBackgroundColor: "#ffffff",
-		titleHeight: 0, // Title Height, Include subTitle
+		titleHeight: 0, // Title Height
 		titleTop: 30, // draws y coordinates. default is 30
-
-		subTitle: "",
-		subTitleFont: "14px Arial",
-		subTitleColor: "#4F4F4F",
-		subTitleTop: 60, // draws y coordinates. default is 0
 
 		logo: undefined,
 		logoWidth: undefined,
 		logoHeight: undefined,
 		logoBackgroundColor: '#ffffff',
 		logoBackgroundTransparent: false,
+		logoBackgroundShape: 'circle', //can be circle or square
 
 		// === Posotion Pattern(Eye) Color
 		PO: undefined, // Global Posotion Outer color. if not set, the defaut is `colorDark`
@@ -1453,28 +1516,26 @@ function QRCode(vOption) {
 		AO: undefined, // Alignment Outer. if not set, the defaut is `colorDark`
 		AI: undefined, // Alignment Inner. if not set, the defaut is `colorDark`
 
-		// === Timing Pattern Color
-		timing: undefined, // Global Timing color. if not set, the defaut is `colorDark`
-		timing_H: undefined, // Horizontal timing color
-		timing_V: undefined, // Vertical timing color
+		eyeShape: 'square', 		//eye is both for alignment or position pattern default is square;  can be circle or square
 
 		// ==== Backgroud Image
 		backgroundImage: undefined, // Background Image
 		backgroundImageAlpha: 1, // Background image transparency, value between 0 and 1. default is 1.
 		autoColor: false,
 
-		// ==== Event Handler
+			// ==== Event Handler
 		onRenderingStart: undefined,
 
         // ==== Images format
         format: 'PNG', // 'PNG', 'JPG'
         compressionLevel: 6, // ZLIB compression level (0-9). default is 6
-        quality: 0.75, // An object specifying the quality (0 to 1). default is 0.75. (JPGs only)
+        quality: 1, // An object specifying the quality (0 to 1). default is 0.75. (JPGs only)
 
          // ==== Versions
          version: 0 // The symbol versions of QR Code range from Version 1 to Version 40. default 0 means automatically choose the closest version based on the text length.
 
 	};
+
 	if (typeof vOption === 'string') {
 		vOption = {
 			text: vOption
@@ -1519,6 +1580,16 @@ function QRCode(vOption) {
 			" , is invalidate, backgroundImageAlpha must between 0 and 1, now reset to 1. ")
 		this._htOption.backgroundImageAlpha = 1;
 	}
+	if(this._htOption.dotShape != 'square' && this._htOption.dotShape != 'rhombus' && this._htOption.dotShape != 'rounded' && this._htOption.dotShape != 'dots') {
+		 console.warn (this._htOption.dotShape + ", is invalidate. Please select square, rounded, rhombus or dots.");
+		 this._htOption.dotShape = 'square';
+	}
+
+	if(this._htOption.logoBackgroundShape != 'square' && this._htOption.logoBackgroundShape != 'circle' ) {
+		console.warn (this._htOption.logoBackgroundShape + ", is invalidate. Please select square or circle.");
+		this._htOption.logoBackgroundShape = 'circle';
+	}
+
 
 	this._htOption.height = this._htOption.height + this._htOption.titleHeight;
 
@@ -1526,7 +1597,9 @@ function QRCode(vOption) {
 	this._oQRCode = new QRCodeModel(_getTypeNumber(this._htOption.text, this._htOption), this._htOption.correctLevel);
 	this._oQRCode.addData(this._htOption.text);
 	this._oQRCode.make();
+	console.log(typeof this._oQRCode);
 }
+
 
 
 /**

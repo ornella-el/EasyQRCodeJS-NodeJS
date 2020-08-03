@@ -1,15 +1,17 @@
 {
-	"name": "easyqrcodejs-nodejs",
-	"version": "3.5.4",
-	"description": "NodeJS QRCode generator. Support Dot style, Logo, Background image, Colorful, Title, etc.",
-	"main": "index.min.js",
-	"scripts": {},
+	"name": "qrcode-nodejs",
+	"version": "1.1.0",
+	"description": "NodeJS QRCode generator. Support Dot style, Logo, Background image, Colorful, Title",
+	"main": "index.js",
+	"scripts": {
+		"test": "cd mydemo && node demo_node"
+	},
 	"homepage": "https://github.com/ushelp/EasyQRCodeJS-NodeJS#readme",
 	"author": "Ray <inthinkcolor@gmail.com>",
 	"directories": {
 		"dist": "dist",
 		"src": "src",
-		"demo": "demo"
+		"demo": "mydemo"
 	},
 	"repository": {
 		"type": "git",
@@ -43,5 +45,8 @@
 	"dependencies": {
 		"canvas": "^2.6.0"
 	},
-	"devDependencies": {}
+	"devDependencies": {
+		"@types/node": "^14.0.9",
+		"typescript": "^3.9.3"
+	}
 }
